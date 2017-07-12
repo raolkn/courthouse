@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="netctestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/NetC" allowedMethods="GET" doc:name="HTTP"/>
+        <set-payload value="[{
+&quot;Id&quot;:1, 
+&quot;Name&quot;:&quot;My Name&quot;, 
+&quot;Email&quot; : &quot;eml@email.com&quot;, 
+&quot;Password&quot;:&quot;Hiphop&quot;, 
+&quot;Active&quot;:&quot;Y&quot;
+},
+{
+&quot;Id&quot;:2, 
+&quot;Name&quot;:&quot;Your Name&quot;, 
+&quot;Email&quot; : &quot;Yeml@email.com&quot;, 
+&quot;Password&quot;:&quot;TipTop&quot;, 
+&quot;Active&quot;:&quot;N&quot;
+}
+]" doc:name="Set Payload"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="netctestFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/NetC" allowedMethods="POST" doc:name="HTTP"/>
+        <!-- <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/> -->
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+Id:payload.Id, 
+Name: payload.Name, 
+Email : "New@email.com", 
+Password:"Hithot", 
+Active:"Y"
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+</mule>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+    <db:mysql-config name="MySQL_Configuration" host="mudb.mulesoft-training.com" port="3306" user="mule" password="mule" database="training" doc:name="MySQL Configuration"/>
+    <flow name="courthouseFlow1">
+        <file:inbound-endpoint path="C:\Mulesoft\In\In1" moveToDirectory="C:\Mulesoft\Out" responseTimeout="10000" doc:name="File-In"/>
+        <dw:transform-message metadata:id="9a022b89-9ab0-452c-94fd-c38ddefb0929" doc:name="Transform Message">
+            <dw:input-payload mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	ID: payload.ID,
+	Name: payload.Name,
+	Email: payload.Email,
+	Password: payload.Password,
+	Active: payload.Active
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="Going to Batch.." level="INFO" doc:name="Logger"/>
+        <batch:execute name="courthouseBatch" metadata:id="b1806c79-0e37-4d44-90e3-4f7acbb343ce" doc:name="courthouseBatch"/>
+    </flow>
+    <batch:job name="courthouseBatch">
+        <batch:input>
+            <logger message="Batch Started..." level="INFO" doc:name="Logger"/>
+        </batch:input>
+        <batch:process-records>
+            <batch:step name="Batch_Step1">
+                <batch:set-record-variable variableName="haveEmail" value="#[payload.Email] != null" metadata:id="8f41eb13-9a06-4af6-af42-d55a62e0442b" doc:name="Record Variable"/>
+                <choice doc:name="Choice-Email">
+                    <when expression="#[haveEmail == false]">
+                        <file:outbound-endpoint path="C:\Mulesoft\Out"  responseTimeout="10000" doc:name="File-No-Email" outputPattern="File-NoEmail.txt"/>
+                    </when>
+                    <otherwise>
+                        <file:outbound-endpoint path="C:\Mulesoft\Out"  responseTimeout="10000" doc:name="File-Email" outputPattern="File-Email.txt"/>
+                    </otherwise>
+                </choice>
+            </batch:step>
+            <batch:step name="Batch_Step2">
+                <choice doc:name="Choice-Active">
+                    <when expression="#[payload.Active != &quot;Y&quot;]">
+                        <file:outbound-endpoint path="C:\Mulesoft\Out" outputPattern="InActive.txt" responseTimeout="10000" doc:name="File-InActive"/>
+                    </when>
+                    <otherwise>
+                        <file:outbound-endpoint path="C:\Mulesoft\Out" outputPattern="Active.txt" responseTimeout="10000" doc:name="File-Active"/>
+                    </otherwise>
+                </choice>
+            </batch:step>
+        </batch:process-records>
+        <batch:on-complete>
+            <logger message="Batch Completed...." level="INFO" doc:name="Logger"/>
+        </batch:on-complete>
+    </batch:job>
+</mule>

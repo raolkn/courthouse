@@ -1,0 +1,16 @@
+[
+    {
+	"ID" : 1,
+        "Name" : "John Smith",
+        "Email" : "abc@mail.com"
+    },
+    {
+	"ID" : 2,
+        "Name" : "Tim Smith",
+        "Email" : "def@mail.com"
+    },
+    {
+	"ID" : 3,
+        "Name" : "Ken Smith",
+        "Email" : "ghi@mail.com"
+    }]

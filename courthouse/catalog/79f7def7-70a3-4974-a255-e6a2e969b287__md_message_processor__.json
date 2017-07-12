@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "jvemp"
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "79f7def7-70a3-4974-a255-e6a2e969b287",
+    "version": "5.2.0.0"
+}

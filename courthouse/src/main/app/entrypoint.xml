@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:ajax="http://www.mulesoft.org/schema/mule/ajax" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+http://www.mulesoft.org/schema/mule/ajax http://www.mulesoft.org/schema/mule/ajax/current/mule-ajax.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd">
+    <spring:beans>
+	    	<spring:bean class="test.courthouse.InvokeSpringSample" name="invokeSpringSample">
+	    	</spring:bean>
+    	</spring:beans>
+    <ee:object-store-caching-strategy name="Caching_Strategy" keyGenerationExpression="#[flowVars.myMin]" doc:name="Caching Strategy"/>
+    <cxf:configuration name="CXF_Configuration" enableMuleSoapHeaders="true" initializeStaticBusInstance="true" doc:name="CXF Configuration"/>
+    <http:listener-config name="HTTP_Listener_Configuration1" host="0.0.0.0" port="8082" doc:name="HTTP Listener Configuration"/>
+    <flow name="entrypointFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/*" doc:name="HTTP"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/splitter&quot;)]">
+                <flow-ref name="slitterTest" doc:name="slitterTest"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/foreach&quot;)]">
+                <flow-ref name="forEachTest" doc:name="forEachTest"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/cookies&quot;)]">
+                <flow-ref name="SetOutbound" doc:name="SetOutbound"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/java&quot;)]">
+                <flow-ref name="javaClass" doc:name="javaClass"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/spring&quot;)]">
+                <flow-ref name="SpringTest" doc:name="SpringTest"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/enrich&quot;)]">
+                <flow-ref name="_knr_testFlow" doc:name="_knr_testFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/flowvar&quot;)]">
+                <flow-ref name="flowVar" doc:name="flowVar"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/valid&quot;)]">
+                <flow-ref name="ValidationTest" doc:name="ValidationTest"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/jtransform&quot;)]">
+                <flow-ref name="jTransformerFlow" doc:name="jTransformerFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/menricher&quot;)]">
+                <flow-ref name="enricherFlow" doc:name="enricherFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/parsdoc&quot;)]">
+                <flow-ref name="parse-doc" doc:name="parse-doc"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/cacheFlow&quot;)]">
+                <flow-ref name="cacheFlow" doc:name="cacheFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/groovy&quot;)]">
+                <flow-ref name="groovyFlow" doc:name="groovyFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/vartest&quot;)]">
+                <flow-ref name="varTestFlow1" doc:name="varTestFlow1"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/cacheFlow&quot;)]">
+                <flow-ref name="cacheFlow" doc:name="cacheFlow"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/xslt&quot;)]">
+                <flow-ref name="xsltFlow1" doc:name="xsltFlow1"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/cxfserv&quot;)]">
+                <flow-ref name="cxfService" doc:name="cxfService"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.request.path'.contains(&quot;/cxfsfdc&quot;)]">
+                <flow-ref name="cxfSalesforce" doc:name="cxfsfdc"/>
+            </when>
+            <otherwise>
+                <logger message="Default called..." level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="varTestFlow1">
+        <set-variable variableName="var1" value="1" doc:name="Variable"/>
+        <set-session-variable variableName="ses1" value="A1" doc:name="Session Variable"/>
+        <flow-ref name="varTestFlow2" doc:name="varTestFlow2"/>
+        <vm:outbound-endpoint exchange-pattern="request-response"  doc:name="VM" path="VMLoc"/>
+        <set-payload value="#[flowVars.var1 + '----' + sessionVars.ses1 + '-----' + (flowVars.var2 == empty ?  'NULL' :  flowVars.var2) + '----' + (sessionVars.ses2== empty ?  'NULL' : sessionVars.ses2)
++ (flowVars.var3 == empty ?  'NULL' :  flowVars.var3) + '----' + (sessionVars.ses3== empty ?  'NULL' : sessionVars.ses3)]" doc:name="Set Payload"/>
+    </flow>
+    <flow name="varTestFlow2">
+        <set-variable variableName="var2" value="2" doc:name="Variable"/>
+        <set-session-variable variableName="ses2" value="A2" doc:name="Session Variable"/>
+    </flow>
+    <flow name="VMFlow">
+        <vm:inbound-endpoint exchange-pattern="request-response"  responseTimeout="1000" doc:name="VM" path="VMLoc"/>
+        <set-variable variableName="var3" value="3" doc:name="Variable"/>
+        <set-session-variable variableName="ses3" value="A3" doc:name="Session Variable"/>
+    </flow>
+    <flow name="enricherFlow">
+        <json:json-to-object-transformer returnClass="test.courthouse.Employee" doc:name="JSON to Object"/>
+        <enricher source="#[payload]" target="#[flowVars.Gendar]" doc:name="Message Enricher">
+            <set-payload value="M" doc:name="Set Payload"/>
+        </enricher>
+        <expression-component doc:name="Expression"><![CDATA[#[payload.Gender = flowVars.Gendar]]]></expression-component>
+        <idempotent-message-filter doc:name="Idempotent Message"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="parse-doc">
+        <flow-ref name="getEmpList" doc:name="getEmpList"/>
+        <set-payload value="processed...." doc:name="Set Payload"/>
+    </flow>
+    <sub-flow name="getEmpList">
+        <parse-template location="C:\Mulesoft\workspace1\courthouse\src\test\resources\employee100.csv" metadata:id="68ebafb5-b6be-4e31-acc2-c689064d092d" doc:name="Parse Template"/>
+        <dw:transform-message metadata:id="faf922f4-d210-4a16-8241-2185cf0f8600" doc:name="Transform Message">
+            <dw:input-payload doc:sample="sample_data\list_csv_5.csv" mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map ((payload01 , indexOfPayload01) -> {
+	ID: payload01.ID,
+	active: payload01.Active,
+	email: payload01.Email,
+	name: payload01.Name,
+	password: payload01.Password
+} as :object {
+	class : "test.courthouse.Employee"
+})]]></dw:set-payload>
+        </dw:transform-message>
+    </sub-flow>
+    <flow name="groovyFlow">
+        <logger message="#[message.inboundProperties.'http.query.params'.name]" level="INFO" doc:name="Logger"/>
+        <set-payload value="#[message.inboundProperties.'http.query.params'.name]" doc:name="Set Payload"/>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[return "Hello.... " + payload.toString().toUpperCase() ;]]></scripting:script>
+        </scripting:component>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="cacheFlow">
+        <logger level="INFO" doc:name="Logger"/>
+        <set-variable variableName="id" value="#[message.inboundProperties.'http.query.params'.id]" doc:name="Variable"/>
+        <set-variable variableName="myMin" value="#[server.dateTime.getMinutes().toString()]" doc:name="Variable"/>
+        <ee:cache cachingStrategy-ref="Caching_Strategy"  doc:name="Cache">
+            <logger message="In Logger : #[flowVars.id]" level="INFO" doc:name="Logger"/>
+            <flow-ref name="getEmpList" doc:name="getEmpList"/>
+        </ee:cache>
+        <set-payload value="#[payload[Integer.parseInt(flowVars.id)].name]" doc:name="Set Payload"/>
+    </flow>
+    <flow name="cxfService">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/cxfserv" doc:name="HTTP"/>
+        <cxf:jaxws-service serviceClass="test.courthouse.HelloWorld" doc:name="CXF"/>
+        <component class="test.courthouse.HelloWorldImpl" doc:name="Java"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="cxfSalesforce">
+        <http:listener config-ref="HTTP_Listener_Configuration1" path="/cxfSfdc" doc:name="HTTP"/>
+        <cxf:jaxws-service serviceClass="test.salesforce.NotificationPort" doc:name="CXF"/>
+        <set-payload value="#[payload[5]]" doc:name="Set Payload"/>
+        <foreach doc:name="For Each">
+            <mulexml:object-to-xml-transformer doc:name="Object to XML"/>
+            <mulexml:xml-to-object-transformer doc:name="XML to Object"/>
+            <dw:transform-message metadata:id="e1ad9c5c-769d-497a-a4a4-908cd705727c" doc:name="Transform Message">
+                <dw:input-payload doc:sample="C:\sfdc-OutData.json" mimeType="application/java"/>
+                <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	email: payload.notification[0].SObject.email,
+	fieldsToNull: payload.notification[0].SObject.fieldsToNull map ((fieldsToNull , indexOfFieldsToNull) -> fieldsToNull),
+	firstName: payload.notification[0].SObject.firstName,
+	id: payload.notification[0].SObject.id
+} as :object {
+	class : "test.salesforce.Contact"
+}]]></dw:set-payload>
+            </dw:transform-message>
+            <json:object-to-json-transformer doc:name="Object to JSON"/>
+        </foreach>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="jTransformerFlow">
+        <json:json-to-object-transformer returnClass="test.courthouse.Employee" doc:name="JSON to Object"/>
+        <custom-transformer class="test.courthouse.javaEmployeeTransformer" doc:name="Java"/>
+        <json:object-to-json-transformer returnClass="java.lang.String" doc:name="Object to JSON"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="ValidationTest">
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <validation:all doc:name="Validation">
+		    <validation:validations>
+		      <validation:is-not-empty doc:name="Validation" value="#[payload.firstName]" message="Firstname cannot be empty"/>
+		      <validation:is-not-empty doc:name="Validation" value="#[payload.lastName]" message="Lastname cannot be empty"/>
+		      <validation:is-number message="Not an adult" value="#[payload.age]" minValue="18" numberType="INTEGER"/>
+		      <validation:matches-regex message="Invalid SSN" value="#[payload.ssn]" regex="^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"/>
+		      <validation:is-email email="#[payload.email]" />
+		      <validation:validate-size value="#[payload.ssn]" min="11" max="11" message="SSN too short"/>
+		    </validation:validations>
+		  </validation:all>
+		  <set-payload value="OK" doc:name="Set Payload"/>
+    </flow>
+    
+    <flow name="courthouseFlow">
+        <file:inbound-endpoint path="C:\Mulesoft\In" moveToDirectory="C:\Mulesoft\Out" responseTimeout="10000" doc:name="File-In"/>
+        <logger level="INFO" doc:name="Logger"/>
+        <dw:transform-message metadata:id="faf922f4-d210-4a16-8241-2185cf0f8600" doc:name="Transform Message">
+            <dw:input-payload mimeType="application/csv" doc:sample="sample_data\list_csv_5.csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map ((payload01 , indexOfPayload01) -> {
+	ID: payload01.ID,
+	active: payload01.Active,
+	email: payload01.Email,
+	name: payload01.Name,
+	password: payload01.Password
+} as :object {
+	class : "test.courthouse.Employee"
+})]]></dw:set-payload>
+        </dw:transform-message>
+        <foreach doc:name="For Each">
+            <validation:all doc:name="Validation">
+                <validation:validations>
+                    <validation:is-not-empty value="#[payload.name]" message="Name can not be empty"/>
+                </validation:validations>
+            </validation:all>
+        </foreach>
+        <batch:execute name="entrypointBatch" doc:name="entrypointBatch"/>
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <smtp:outbound-endpoint host="localhost" responseTimeout="10000" doc:name="SMTP"/>
+        </catch-exception-strategy>
+
+    </flow>
+    <batch:job name="entrypointBatch">
+        <batch:process-records>
+            <batch:step name="Batch_Step">
+                <logger level="INFO" doc:name="Logger"/>
+            </batch:step>
+            <batch:step name="Batch_Step2">
+                <batch:commit size="5" doc:name="Batch Commit">
+                    <logger message="Batch Commit.................." level="INFO" doc:name="Logger"/>
+                </batch:commit>
+            </batch:step>
+        </batch:process-records>
+        <batch:on-complete>
+            <file:outbound-endpoint path="C:\Mulesoft\Out" outputPattern="MessageOut.txt" responseTimeout="10000" doc:name="File"/>
+        </batch:on-complete>
+    </batch:job>
+    
+    <flow name="flowVar">
+        <set-variable variableName="mainVar" value="mainVar-val" doc:name="Variable1"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger  level="INFO" doc:name="Logger"/>
+        <flow-ref name="Sub_Flow" doc:name="Sub_Flow"/>
+        <flow-ref name="javaClass" doc:name="javaClass"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <sub-flow name="Sub_Flow">
+        <set-variable variableName="subVar" value="subVar-Val" doc:name="Variable"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </sub-flow>
+    <!-- <flow name="enricherTest">
+        <set-variable variableName="flowVars" value="#[payload]" doc:name="Variable"/>
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <enricher doc:name="Message Enricher" source="#[(Details.email in payload.People)]" target="#[flowVars.myJsonMap]">
+            <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+            <enrich source="" target=""/>
+        </enricher>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow> -->
+    <flow name="SpringTest">
+	    
+        <invoke object-ref="invokeSpringSample" method="methodA" doc:name="Invoke-MethodA" name="Invoke-MethodA"/>
+        <echo-component doc:name="Echo-A"/>
+        <invoke name="Invoke-MethodB" object-ref="invokeSpringSample" method="methodB" doc:name="Invoke-MethodB"/>
+        <echo-component doc:name="Echo-B"/>
+        <invoke name="Invoke-MethodC" object-ref="invokeSpringSample" method="methodC" doc:name="Invoke-MethodC" methodArguments="#[message.inboundProperties.'http.query.params'.name], #[message.inboundProperties.'http.query.params'.grade]"/>
+        <echo-component doc:name="Echo-C"/>
+    </flow>
+    <flow name="javaClass">
+        <component class="test.courthouse.JavaDummy" doc:name="Java"/>
+        <json:object-to-json-transformer returnClass="java.lang.String" doc:name="Object to JSON"/>
+        <logger level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="test.courthouse.Person" doc:name="JSON to Object"/>
+        <set-variable variableName="var1" value="" doc:name="Variable"/>
+        <expression-component doc:name="Expression"><![CDATA[flowVars.var1 = ((test.courthouse.Person)message.payload ).sayHello();]]></expression-component>
+        <set-payload value="#[var1]" doc:name="Set Payload"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="SetOutbound">
+        <set-variable variableName="varHead" value="#[message.inboundProperties]" doc:name="Variable"/>
+        <set-property propertyName="cookies1" value="#[server.dateTime.format(&quot;dd-mm-yyyy hh:MM:ss&quot;)]" doc:name="Property"/>
+        <expression-component doc:name="Expression"><![CDATA[#[message.outboundProperties.cookies = server.dateTime.format("dd-mm-yyyy hh:MM:ss")]]]></expression-component>
+        <set-payload value="#[flowVars.varHead.accept] ++ '----------------' ++
+#[flowVars.varHead.containsKey('cookies') ? flowVars.varHead.containsKey('cookies') : &quot;It's Empty...&quot;] 
+" doc:name="Set Payload"/>
+    </flow>
+    <flow name="slitterTest">
+        <logger level="INFO" doc:name="Logger"/>
+        <splitter expression="#[xpath('//actor')]" doc:name="Splitter">
+            <expression-message-info-mapping messageIdExpression="#[message.id]" correlationIdExpression="#[message.correlationId]"/>
+        </splitter>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <logger message="#[message.payload].CID : #[message.correlationId]" level="INFO" doc:name="Logger"/>
+        <collection-aggregator failOnTimeout="true" doc:name="Collection Aggregator"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <logger level="INFO" doc:name="Logger"/>
+
+    </flow>
+    <flow name="VM-Actor">
+        <vm:inbound-endpoint exchange-pattern="one-way" path="vm:\\actor" doc:name="VM"/>
+        <logger message="IN VM.... :" level="INFO" doc:name="Logger"/>
+        <combine-collections-transformer doc:name="Combine Collections"/>
+        <object-to-string-transformer doc:name="Object to String"/>
+        <file:outbound-endpoint path="C:\Mulesoft\Out" outputPattern="MessageOut.txt" responseTimeout="10000" doc:name="File"/>
+    </flow>
+    <flow name="forEachTest">
+        <logger message="#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="java.lang.Object" doc:name="JSON to Object"/>
+        <set-variable variableName="myVar" value="#[new java.util.HashMap()]" doc:name="Variable"/>
+        <foreach collection="#[payload.activititylist]" rootMessageVariableName="RootMessage" doc:name="For Each">
+            <logger message="#[payload.activity.activity] ---------- counter #[flowVars.counter] ------------ Root: #[flowVars.RootMessage]" level="INFO" doc:name="Logger"/>
+            <expression-component doc:name="Expression"><![CDATA[#[
+String act = payload.activity.activity;
+flowVars.myVar.put(act,act);
+]]]></expression-component>
+            <set-variable variableName="activityNamer" value="#[payload.activity.activity]" doc:name="Variable"/>
+        </foreach>
+        <logger message="After forLook #[flowVars.activityNamer]" level="INFO" doc:name="Logger"/>
+        <logger message="#[flowVars.myVar]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="batchTestFlow">
+        <file:inbound-endpoint path="C:\Mulesoft\In1" moveToDirectory="C:\Mulesoft\Out" responseTimeout="10000" doc:name="File-In"/>
+        <dw:transform-message metadata:id="faf922f4-d210-4a16-8241-2185cf0f8600" doc:name="Transform Message">
+            <dw:input-payload doc:sample="sample_data\list_csv_5.csv" mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map ((payload01 , indexOfPayload01) -> {
+	ID: payload01.ID,
+	active: payload01.Active,
+	email: payload01.Email,
+	name: payload01.Name,
+	password: payload01.Password
+} as :object {
+	class : "test.courthouse.Employee"
+})]]></dw:set-payload>
+        </dw:transform-message>
+        <batch:execute name="batchProcessFlow" doc:name="batchProcessFlow"/>
+    </flow>
+    <batch:job name="batchProcessFlow" job-instance-id="#[server.dateTime.format(&quot;ss&quot;)]" block-size="30">
+        <batch:process-records>
+            <batch:step name="Batch_Step1">
+                <batch:set-record-variable variableName="recVal" value="#[payload.email == empty ? &quot;F&quot; : &quot;M&quot;]" doc:name="Record Variable"/>
+                <expression-component doc:name="Expression"><![CDATA[#[payload.gender = recordVars.recVal]]]></expression-component>
+                <batch:commit size="25" doc:name="Batch Commit">
+                    <json:object-to-json-transformer doc:name="Object to JSON"/>
+                    <file:outbound-endpoint path="C:\Mulesoft\Out" outputPattern="OutEmp.txt" responseTimeout="10000" doc:name="File"/>
+                </batch:commit>
+            </batch:step>
+        </batch:process-records>
+    </batch:job>
+    <flow name="xsltFlow1">
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <mulexml:xslt-transformer xsl-file="Auther-XSLT.xsl" maxIdleTransformers="2" maxActiveTransformers="5" doc:name="XSLT"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+
+
+</mule>
+
+
+

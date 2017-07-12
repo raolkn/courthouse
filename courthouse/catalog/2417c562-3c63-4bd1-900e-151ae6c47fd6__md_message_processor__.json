@@ -1,0 +1,16 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "javaObject"
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "javaCntact"
+        }
+    },
+    "id": "2417c562-3c63-4bd1-900e-151ae6c47fd6",
+    "version": "5.2.0.0"
+}

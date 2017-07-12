@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:objectstore="http://www.mulesoft.org/schema/mule/objectstore" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <objectstore:config name="ObjectStore__ProcessStatusConnector" partition="ProcessStatus" doc:name="ObjectStore: Connector"/>
+    <vm:connector name="AppToAppVM" validateConnections="true" doc:name="VM"/>
+    <flow name="commonFlow">
+        <vm:inbound-endpoint exchange-pattern="request-response" path="ProcessStatus" connector-ref="AppToAppVM" doc:name="VM"/>
+        <expression-component doc:name="Expression"><![CDATA[#[
+flowVars.payloadData=payload;
+]]]></expression-component>
+        <logger level="INFO" doc:name="Logger"/>
+        <objectstore:contains config-ref="ObjectStore__ProcessStatusConnector" key="#[payload.Key]" doc:name="ObjectStore-Contains"/>
+        <set-variable variableName="storeContainsKey" value="#[payload]" doc:name="Variable"/>
+        <set-payload value="#[flowVars.payloadData]" doc:name="Set Payload"/>
+        <choice doc:name="Choice-Create-Remove">
+            <when expression="#[payload.Value.equalsIgnoreCase('REMOVE')]">
+                <choice doc:name="Choice-REMOVE">
+                    <when expression="#[flowVars.storeContainsKey]">
+                        <objectstore:remove config-ref="ObjectStore__ProcessStatusConnector" key="#[payload.Key]" doc:name="ObjectStore"/>
+                        <set-payload value="#['REMOVED']" doc:name="Set Payload"/>
+                    </when>
+                    <otherwise>
+                        <set-payload value="#['DOESNOT EXIST']" doc:name="Set Payload"/>
+                    </otherwise>
+                </choice>
+            </when>
+            <otherwise>
+                <choice doc:name="Choice-CREATE">
+                    <when expression="#[flowVars.storeContainsKey]">
+                        <set-payload value="#['EXIST']" doc:name="Set Payload"/>
+                    </when>
+                    <otherwise>
+                        <objectstore:store config-ref="ObjectStore__ProcessStatusConnector" key="#[payload.Key]" value-ref="#[payload.Value]" doc:name="ObjectStore-Store"/>
+                        <set-payload value="#['CREATED']" doc:name="Set Payload"/>
+                    </otherwise>
+                </choice>
+            </otherwise>
+        </choice>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

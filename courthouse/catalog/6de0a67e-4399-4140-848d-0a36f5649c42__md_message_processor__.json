@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {},
+        "outboundProperties": {
+            "MULE_ENCODING": {}
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "6de0a67e-4399-4140-848d-0a36f5649c42",
+    "version": "5.2.0.0"
+}

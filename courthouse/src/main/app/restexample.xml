@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/current/mule-jersey.xsd">
+    <flow name="restexampleFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Logger"/>
+        <enricher source="#[payload]" target="flowVars.InVal" doc:name="Message Enricher">
+            <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        </enricher>
+        <jersey:resources doc:name="REST">
+            <component class="test.courthouse.RESTMathOperation"/>
+        </jersey:resources>
+        <enricher source="#[payload]" target="flowVars.OutVal" doc:name="Message Enricher">
+            <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        </enricher>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
